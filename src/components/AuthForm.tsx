@@ -26,6 +26,7 @@ export default function AuthForm({ mode, onToggleMode }: AuthFormProps) {
     reset,
   } = useForm<LoginFormData | SignupFormData>({
     resolver: zodResolver(schema),
+    mode: 'onChange',
   })
 
   const onSubmit = async (data: LoginFormData | SignupFormData) => {
@@ -41,8 +42,9 @@ export default function AuthForm({ mode, onToggleMode }: AuthFormProps) {
         if (error) throw error
       }
       reset()
-    } catch (error: any) {
-      setAuthError(error.message || 'Error de autenticación')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error de autenticación'
+      setAuthError(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -131,9 +133,9 @@ export default function AuthForm({ mode, onToggleMode }: AuthFormProps) {
                   className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder="Confirmar Contraseña"
                 />
-                {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
-                )}
+                                 {!isLogin && 'confirmPassword' in errors && errors.confirmPassword && (
+                   <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+                 )}
               </div>
             )}
           </div>

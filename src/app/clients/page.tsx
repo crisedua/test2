@@ -63,7 +63,7 @@ export default function ClientsPage() {
             </div>
             
             <ClientForm
-              client={editingClient}
+              client={editingClient || undefined}
               onSuccess={handleFormSuccess}
               onCancel={handleFormCancel}
             />

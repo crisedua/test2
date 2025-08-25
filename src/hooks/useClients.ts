@@ -13,14 +13,8 @@ export function useClients() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (user) {
-      fetchClients()
-    }
-  }, [user])
-
   const fetchClients = async () => {
-    if (!user) return
+    if (!user || !supabase) return
 
     try {
       setLoading(true)
@@ -39,8 +33,14 @@ export function useClients() {
     }
   }
 
+  useEffect(() => {
+    if (user) {
+      fetchClients()
+    }
+  }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const createClient = async (clientData: Omit<ClientInsert, 'user_id'>) => {
-    if (!user) throw new Error('User not authenticated')
+    if (!user || !supabase) throw new Error('User not authenticated or Supabase not configured')
 
     try {
       const { data, error } = await supabase
@@ -60,6 +60,8 @@ export function useClients() {
   }
 
   const updateClient = async (id: string, updates: ClientUpdate) => {
+    if (!supabase) throw new Error('Supabase not configured')
+    
     try {
       const { data, error } = await supabase
         .from('clients')
@@ -80,6 +82,8 @@ export function useClients() {
   }
 
   const deleteClient = async (id: string) => {
+    if (!supabase) throw new Error('Supabase not configured')
+    
     try {
       const { error } = await supabase
         .from('clients')
@@ -98,7 +102,7 @@ export function useClients() {
   }
 
   const searchClients = async (query: string) => {
-    if (!user) return
+    if (!user || !supabase) return
 
     try {
       setLoading(true)
