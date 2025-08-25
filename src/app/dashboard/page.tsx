@@ -1,12 +1,21 @@
 'use client'
 
 import { useClients } from '@/hooks/useClients'
-import { Users, TrendingUp, Calendar, Building } from 'lucide-react'
+import { useOpportunities } from '@/hooks/useOpportunities'
+import { useTasks } from '@/hooks/useTasks'
+import { useInteractions } from '@/hooks/useInteractions'
+import { Users, Calendar, Target, CheckSquare, MessageCircle, DollarSign } from 'lucide-react'
 import Link from 'next/link'
 import ProtectedRoute from '@/components/ProtectedRoute'
 
 export default function DashboardPage() {
   const { clients, loading } = useClients()
+  const { opportunities, getTotalValue } = useOpportunities()
+  const { getTasksByStatus, getOverdueTasks } = useTasks()
+  const { interactions } = useInteractions()
+
+  const tasksByStatus = getTasksByStatus()
+  const overdueTasks = getOverdueTasks()
 
   const stats = [
     {
@@ -16,40 +25,37 @@ export default function DashboardPage() {
       color: 'bg-blue-500',
     },
     {
-      name: 'Clientes Activos',
-      value: clients.filter(client => client.status === 'cliente').length,
-      icon: TrendingUp,
+      name: 'Oportunidades',
+      value: opportunities.length,
+      icon: Target,
       color: 'bg-green-500',
     },
     {
-      name: 'Prospectos',
-      value: clients.filter(client => client.status === 'prospecto').length,
-      icon: Building,
+      name: 'Valor Pipeline',
+      value: `$${getTotalValue().toLocaleString()}`,
+      icon: DollarSign,
+      color: 'bg-emerald-500',
+    },
+    {
+      name: 'Tareas Pendientes',
+      value: tasksByStatus.pendiente?.length || 0,
+      icon: CheckSquare,
       color: 'bg-yellow-500',
     },
     {
-      name: 'Empresas Únicas',
-      value: new Set(clients.map(client => client.company_id || 'Sin empresa')).size,
-      icon: Building,
-      color: 'bg-purple-500',
-    },
-    {
-      name: 'Contactos este Mes',
-      value: clients.filter(client => {
-        if (!client.lastContact) return false
-        const contactDate = new Date(client.lastContact)
-        const now = new Date()
-        return contactDate.getMonth() === now.getMonth() && 
-               contactDate.getFullYear() === now.getFullYear()
-      }).length,
+      name: 'Tareas Vencidas',
+      value: overdueTasks.length,
       icon: Calendar,
-      color: 'bg-indigo-500',
+      color: 'bg-red-500',
     },
     {
-      name: 'Clientes Inactivos',
-      value: clients.filter(client => client.status === 'inactivo').length,
-      icon: Users,
-      color: 'bg-red-500',
+      name: 'Actividades Hoy',
+      value: interactions.filter(interaction => {
+        const today = new Date().toDateString()
+        return new Date(interaction.date).toDateString() === today
+      }).length,
+      icon: MessageCircle,
+      color: 'bg-purple-500',
     },
   ]
 
@@ -63,89 +69,102 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">
-            Bienvenido a tu CRM. Aquí tienes un resumen de tu actividad.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {stats.map((stat) => {
-            const Icon = stat.icon
-            return (
-              <div key={stat.name} className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className={`p-3 rounded-full ${stat.color}`}>
-                    <Icon className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                    <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Actividad Reciente</h2>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-12 text-center">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+              Dashboard CRM
+            </h1>
+            <p className="text-lg text-slate-600 mt-3 max-w-2xl mx-auto">
+              Bienvenido a tu centro de control empresarial. Monitorea métricas clave y toma decisiones informadas.
+            </p>
           </div>
-          <div className="p-6">
-            {clients.length === 0 ? (
-              <div className="text-center py-8">
-                <Users className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No hay clientes</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Comienza agregando tu primer cliente.
-                </p>
-                <div className="mt-6">
-                  <Link
-                    href="/clients"
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Agregar Cliente
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {clients.slice(0, 5).map((client) => (
-                  <div key={client.id} className="flex items-center space-x-4">
-                    <div className="flex-shrink-0">
-                      <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                        <span className="text-sm font-medium text-blue-600">
-                          {client.name.charAt(0).toUpperCase()}
-                        </span>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {stats.map((stat) => {
+              const Icon = stat.icon
+              return (
+                <div key={stat.name} className="group relative">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                  <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                    <div className="flex items-center">
+                      <div className={`p-4 rounded-2xl ${stat.color} shadow-lg`}>
+                        <Icon className="h-8 w-8 text-white" />
+                      </div>
+                      <div className="ml-6">
+                        <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">{stat.name}</p>
+                        <p className="text-3xl font-bold text-slate-900 mt-1">{stat.value}</p>
                       </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {client.name}
-                      </p>
-                      <p className="text-sm text-gray-500">{client.position || 'Sin cargo'}</p>
-                    </div>
-                    <div className="flex-shrink-0 text-sm text-gray-500">
-                      <Calendar className="h-4 w-4 inline mr-1" />
-                      {new Date(client.created_at).toLocaleDateString()}
-                    </div>
                   </div>
-                ))}
-                {clients.length > 5 && (
-                  <div className="text-center pt-4">
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="group relative">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+            <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+              <div className="px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50 to-blue-50">
+                <h2 className="text-xl font-bold text-slate-900 flex items-center">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 animate-pulse"></div>
+                  Actividad Reciente
+                </h2>
+              </div>
+              <div className="p-8">
+                {clients.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl flex items-center justify-center mb-4">
+                      <Users className="h-10 w-10 text-blue-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay clientes</h3>
+                    <p className="text-slate-600 mb-6 max-w-sm mx-auto">
+                      Comienza construyendo tu base de clientes para ver la actividad aquí.
+                    </p>
                     <Link
                       href="/clients"
-                      className="text-sm text-blue-600 hover:text-blue-500"
+                      className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
                     >
-                      Ver todos los clientes →
+                      Agregar Primer Cliente
                     </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {clients.slice(0, 5).map((client, index) => (
+                      <div key={client.id} className={`flex items-center space-x-4 p-4 rounded-xl hover:bg-slate-50/80 transition-colors duration-200 ${index !== clients.length - 1 ? 'border-b border-slate-100/50 pb-6' : ''}`}>
+                        <div className="flex-shrink-0">
+                          <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                            <span className="text-white font-bold text-lg">
+                              {client.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-base font-semibold text-slate-900 truncate">
+                            {client.name}
+                          </p>
+                          <p className="text-sm text-slate-500">{client.position || 'Sin cargo'}</p>
+                        </div>
+                        <div className="flex-shrink-0 text-sm text-slate-500 flex items-center">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          {new Date(client.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))}
+                    {clients.length > 5 && (
+                      <div className="text-center pt-6">
+                        <Link
+                          href="/clients"
+                          className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
+                        >
+                          Ver todos los clientes →
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
