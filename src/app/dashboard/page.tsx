@@ -16,21 +16,40 @@ export default function DashboardPage() {
       color: 'bg-blue-500',
     },
     {
-      name: 'Clientes este Mes',
-      value: clients.filter(client => {
-        const clientDate = new Date(client.created_at)
-        const now = new Date()
-        return clientDate.getMonth() === now.getMonth() && 
-               clientDate.getFullYear() === now.getFullYear()
-      }).length,
+      name: 'Clientes Activos',
+      value: clients.filter(client => client.status === 'cliente').length,
       icon: TrendingUp,
       color: 'bg-green-500',
+    },
+    {
+      name: 'Prospectos',
+      value: clients.filter(client => client.status === 'prospecto').length,
+      icon: Building,
+      color: 'bg-yellow-500',
     },
     {
       name: 'Empresas Únicas',
       value: new Set(clients.map(client => client.company)).size,
       icon: Building,
       color: 'bg-purple-500',
+    },
+    {
+      name: 'Contactos este Mes',
+      value: clients.filter(client => {
+        if (!client.lastContact) return false
+        const contactDate = new Date(client.lastContact)
+        const now = new Date()
+        return contactDate.getMonth() === now.getMonth() && 
+               contactDate.getFullYear() === now.getFullYear()
+      }).length,
+      icon: Calendar,
+      color: 'bg-indigo-500',
+    },
+    {
+      name: 'Clientes Inactivos',
+      value: clients.filter(client => client.status === 'inactivo').length,
+      icon: Users,
+      color: 'bg-red-500',
     },
   ]
 
@@ -52,7 +71,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {stats.map((stat) => {
             const Icon = stat.icon
             return (

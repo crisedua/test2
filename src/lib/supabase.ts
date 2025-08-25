@@ -39,6 +39,9 @@ export type Database = {
           email: string
           phone: string
           company: string
+          status: string
+          notes: string | null
+          lastContact: string | null
           created_at: string
           updated_at: string
         }
@@ -49,6 +52,9 @@ export type Database = {
           email: string
           phone: string
           company: string
+          status?: string
+          notes?: string | null
+          lastContact?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -59,6 +65,9 @@ export type Database = {
           email?: string
           phone?: string
           company?: string
+          status?: string
+          notes?: string | null
+          lastContact?: string | null
           created_at?: string
           updated_at?: string
         }

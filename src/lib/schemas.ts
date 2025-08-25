@@ -19,6 +19,9 @@ export const clientSchema = z.object({
   email: z.string().email('Email inválido'),
   phone: z.string().min(10, 'El teléfono debe tener al menos 10 caracteres'),
   company: z.string().min(2, 'El nombre de la empresa debe tener al menos 2 caracteres'),
+  status: z.enum(['prospecto', 'cliente', 'inactivo']),
+  notes: z.string().optional(),
+  lastContact: z.string().optional(),
 })
 
 export type LoginFormData = z.infer<typeof loginSchema>
