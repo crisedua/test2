@@ -31,7 +31,8 @@ export default function ClientForm({ client, onSuccess, onCancel }: ClientFormPr
       name: client.name,
       email: client.email,
       phone: client.phone,
-      company: client.company,
+      company: client.company_id || '',
+      position: client.position || '',
       status: client.status as 'prospecto' | 'cliente' | 'inactivo',
       notes: client.notes || '',
       lastContact: client.lastContact || '',
@@ -114,6 +115,22 @@ export default function ClientForm({ client, onSuccess, onCancel }: ClientFormPr
         />
         {errors.company && (
           <p className="mt-1 text-sm text-red-600">{errors.company.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="position" className="block text-sm font-medium text-gray-700">
+          Cargo/Posición
+        </label>
+        <input
+          type="text"
+          id="position"
+          {...register('position')}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+          placeholder="Director, Gerente, CEO, etc."
+        />
+        {errors.position && (
+          <p className="mt-1 text-sm text-red-600">{errors.position.message}</p>
         )}
       </div>
 

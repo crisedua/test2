@@ -29,7 +29,7 @@ export default function DashboardPage() {
     },
     {
       name: 'Empresas Únicas',
-      value: new Set(clients.map(client => client.company)).size,
+      value: new Set(clients.map(client => client.company_id || 'Sin empresa')).size,
       icon: Building,
       color: 'bg-purple-500',
     },
@@ -126,7 +126,7 @@ export default function DashboardPage() {
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {client.name}
                       </p>
-                      <p className="text-sm text-gray-500">{client.company}</p>
+                      <p className="text-sm text-gray-500">{client.position || 'Sin cargo'}</p>
                     </div>
                     <div className="flex-shrink-0 text-sm text-gray-500">
                       <Calendar className="h-4 w-4 inline mr-1" />

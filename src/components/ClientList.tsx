@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useClients } from '@/hooks/useClients'
-import { Search, Edit, Trash2, Plus, Mail, Phone, Building, Filter, Calendar, FileText } from 'lucide-react'
+import { Search, Edit, Trash2, Plus, Mail, Phone, Building, Filter, Calendar, FileText, User } from 'lucide-react'
 import type { Database } from '@/lib/supabase'
 
 type Client = Database['public']['Tables']['clients']['Row']
@@ -162,8 +162,14 @@ export default function ClientList({ onEditClient, onDeleteClient, onAddClient }
                            </div>
                            <div className="flex items-center space-x-1">
                              <Building className="h-4 w-4" />
-                             <span>{client.company}</span>
+                             <span>{client.company_id ? 'Empresa Asignada' : 'Sin empresa'}</span>
                            </div>
+                           {client.position && (
+                             <div className="flex items-center space-x-1">
+                               <User className="h-4 w-4" />
+                               <span>{client.position}</span>
+                             </div>
+                           )}
                            <div className="flex items-center space-x-1">
                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(client.status)}`}>
                                {getStatusText(client.status)}
