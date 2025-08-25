@@ -13,6 +13,7 @@ export default function Navigation() {
     await signOut()
   }
 
+  // Solo mostrar navegación si hay usuario autenticado
   if (!user) return null
 
   return (

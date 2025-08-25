@@ -7,8 +7,8 @@ import Navigation from '@/components/Navigation'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'CRM - Gestión de Clientes',
-  description: 'Sistema CRM moderno para gestión de clientes',
+  title: 'CRM Pro - Gestión de Clientes',
+  description: 'Sistema CRM moderno y eficiente para gestión de clientes',
 }
 
 export default function RootLayout({
@@ -21,7 +21,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <Navigation />
-          <main className="min-h-screen bg-gray-50">
+          <main>
             {children}
           </main>
         </AuthProvider>
